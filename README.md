@@ -5,9 +5,9 @@ A disk cache with network loading and UIImage category
 
 The main active parts of this are TMDiskCache and TMDownloadManager.
 
-The part you'll want to use is the UIImage category which allows you to set the image to load from a URL.
+The part you'll want to use is the UIImageView category which allows you to set the image to load from a URL.
 
-# Using the UIImage category
+# Using the UIImageView category
 
 
 Very basically you call it like this
