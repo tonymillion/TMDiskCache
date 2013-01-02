@@ -1,7 +1,7 @@
 TMDiskCache
 ===========
 
-A disk cache with network loading and UIImage category
+A disk cache with network loading and UIImageView category
 
 The main active parts of this are TMDiskCache and TMDownloadManager.
 
@@ -36,7 +36,7 @@ Because the Category caches the last set URL if you by-pass this by calling setI
 
 #basic usage of TMDiskCache
 
-At its simplest the UIImage category will use the "default" TMDiskCache singleton, however a better implementation is for you to alloc you own instances of TMDiskCache with their own cache sizes, e.g. if you were writing an app.net client you could do something like 
+At its simplest the UIImageView category will use the "default" TMDiskCache singleton, however a better implementation is for you to alloc you own instances of TMDiskCache with their own cache sizes, e.g. if you were writing an app.net client you could do something like 
 
 appDelegate.h
 ```
