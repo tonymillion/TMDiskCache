@@ -26,20 +26,39 @@
  */
 
 
-#import <Foundation/Foundation.h>
+#import "UIImage+ForceLoad.h"
 
-#import "TMDiskCache.h"
+@implementation UIImage (ForceLoad)
 
-@interface TMDownloadManager : NSObject
+// interesting trick, we force the UIImage to draw somewhere, then discard!
+// this has the action of demanding that the UIImage actually decode the data.
 
-+(TMDownloadManager*)sharedInstance;
+// NB: there is probably a better way of doing this using ImageIO
 
--(void)getDataForURL:(NSURL*)url
-      saveToLocalURL:localFileURL
-              sender:(id)sender
-             success:(void(^)(NSURL * localURL))success
-             failure:(void(^)(NSError * error))failure;
+-(void)forceLoad
+{
+    const CGImageRef cgImage = [self CGImage];
 
--(void)cancelCallbacksForSender:(id)sender;
+	const int width = CGImageGetWidth(cgImage)/4;
+    const int height = CGImageGetHeight(cgImage)/4;
+
+    if([[NSThread currentThread] isEqual:[NSThread mainThread]])
+    {
+        NSLog(@"DANGER THIS IS EXECUTING ON THE MAIN THREAD");
+    }
+
+	const CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+
+	CGContextRef context = CGBitmapContextCreate(NULL,
+												 width, height,
+												 CGImageGetBitsPerComponent(cgImage),
+												 CGImageGetBytesPerRow(cgImage),
+												 colorspace,
+												 kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
+    CGContextRelease(context);
+}
 
 @end
+

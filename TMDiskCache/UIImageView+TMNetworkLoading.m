@@ -1,10 +1,30 @@
-//
-//  UIImageView+TMNetworkLoading.m
-//  imagedownloadqueue
-//
-//  Created by Tony Million on 31/12/2012.
-//  Copyright (c) 2012 tonymillion. All rights reserved.
-//
+/*
+ Copyright (c) 2013, Tony Million.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ 1. Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 #import <objc/runtime.h>
 
@@ -17,6 +37,31 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 @implementation UIImageView (TMNetworkLoading)
 
 @dynamic imageURL;
+
+// FOR FUTURE IMPLEMENTATION TO FIX setImage
+/*
++ (void)load
+{
+    SEL originalSelector = @selector(setImage:);
+    SEL overrideSelector = @selector(newSetImage:);
+    Method originalMethod = class_getInstanceMethod(self, originalSelector);
+    Method overrideMethod = class_getInstanceMethod(self, overrideSelector);
+    if (class_addMethod(self, originalSelector, method_getImplementation(overrideMethod), method_getTypeEncoding(overrideMethod)))
+    {
+        class_replaceMethod(self, overrideSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
+    }
+    else
+    {
+        method_exchangeImplementations(originalMethod, overrideMethod);
+    }
+}
+
+-(void)newSetImage:(UIImage*)image
+{
+    [self newSetImage:image];
+    self.imageURL       = nil;
+}
+*/
 
 -(void)setImageURL:(NSURL *)imageURL
 {
@@ -35,27 +80,27 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 -(NSOperationQueue*)decodeOperationQueue
 {
     static NSOperationQueue * downloadQueue;
-    
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         downloadQueue = [[NSOperationQueue alloc] init];
         downloadQueue.name = @"com.tonymillion.UIImageViewDecodeQueue";
 		downloadQueue.maxConcurrentOperationCount = 2;
     });
-    
+
     return downloadQueue;
 }
 
 +(NSCache*)downloadCache
 {
     static NSCache * downloadCache;
-    
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         downloadCache = [[NSCache alloc] init];
         downloadCache.name = @"com.tonymillion.UIImageViewNetworkLoadCache";
     });
-    
+
     return downloadCache;
 }
 
@@ -76,7 +121,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 		 fromCache:(TMDiskCache*)diskCache
 {
     [[TMDownloadManager sharedInstance] cancelCallbacksForSender:self];
-    
+
     // if we dont pass a URL then just set the
     // place holder image and dtop the hell out!
     if(!url || [url isKindOfClass:[NSNull class]])
@@ -85,7 +130,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
         [self setImage:placeholderImage];
         return;
     }
-    
+
     ///////////////////////////////////////////////////
     //
     // next see if we have this in the cache
@@ -100,20 +145,20 @@ static char * const kImageURLKey	= "kURLAssociationKey";
             self.imageURL       = url;
             // Dont animate here, we can set the image immediately and haven't even loaded the placeholder
             [self setImage:cachedImage];
+
+            //TODO: touch the file in the cache?
             return;
         }
     }
-    
+
     // if we dont have it cached then we should set the placeholder here!
     self.image = placeholderImage;
-    
+
     if(!diskCache)
     {
         diskCache = [TMDiskCache sharedInstance];
     }
-    
-    
-    
+
     [diskCache checkCacheForURL:url
                         success:^(NSURL *localURL) {
                             UIImage * temp = [UIImage imageWithContentsOfFile:localURL.path];
@@ -121,7 +166,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                             {
                                 self.imageURL = url;
                                 [self setImageFromImage:temp];
-                                
+
                                 [[UIImageView downloadCache] setObject:temp
                                                                 forKey:url.absoluteString
                                                                   cost:50];
@@ -132,21 +177,12 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                                                                saveToLocalURL:localURL
                                                                        sender:self
                                                                       success:^(NSURL * localURL) {
-                                                                          /*
-                                                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                                                              [self loadFromURL:url
-                                                                               placeholderImage:placeholderImage
-                                                                                      fromCache:diskCache];
-                                                                              
-                                                                          });
-                                                                           */
-                                                                          
                                                                           UIImage * temp = [UIImage imageWithContentsOfFile:localURL.path];
                                                                           if(temp)
                                                                           {
                                                                               self.imageURL = url;
                                                                               [self setImageFromImage:temp];
-                                                                              
+
                                                                               [[UIImageView downloadCache] setObject:temp
                                                                                                               forKey:url.absoluteString
                                                                                                                 cost:50];
@@ -157,49 +193,16 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                                                                           self.imageURL = url;
                                                                       }];
                         }];
-    /*
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        NSURL * ourlocalURL = [diskCache localFileNameForURL:url];
-        UIImage * temp = [UIImage imageWithContentsOfFile:ourlocalURL.path];
-        if(temp)
-        {
-            self.imageURL = url;
-            [self setImageFromImage:temp];
-            
-            [[UIImageView downloadCache] setObject:temp
-                                            forKey:url.absoluteString
-                                              cost:50];
-        }
-        else
-        {
-            [[TMDownloadManager sharedInstance] getDataForURL:url
-                                               saveToLocalURL:ourlocalURL
-                                                       sender:self
-                                                      success:^(NSURL * localURL) {
-                                                          
-                                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                                              [self loadFromURL:url
-                                                               placeholderImage:placeholderImage
-                                                                      fromCache:diskCache];
-
-                                                          });
-                                                      }
-                                                      failure:^(NSError *error) {
-                                                          self.imageURL = url;
-                                                      }];
-        }
-    });
-     */
 }
 
 -(UIImage*)setImageFromImage:(UIImage*)theImage
 {
     [theImage forceLoad];
-    
+
     dispatch_sync(dispatch_get_main_queue(), ^{
         [self setImageAnimated:theImage];
     });
-    
+
     return theImage;
 }
 
