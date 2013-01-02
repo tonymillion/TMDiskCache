@@ -275,7 +275,7 @@
     _outputStream = nil;
     
     //if the download failed delete whatever we had downloaded!
-    [[NSFileManager defaultManager] removeItemAtURL:_localFileURL
+    [[NSFileManager defaultManager] removeItemAtURL:_tempFileURL
                                               error:nil];
     
 	self.error = aError;
