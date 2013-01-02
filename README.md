@@ -50,3 +50,27 @@ This will check if the item for the remote URL exists in the cache, if it does t
 # Basic usage of TMDownloadManager
 
 **to be written**
+
+
+# Using the UIImage category
+
+Very basically you call it like this
+
+```
+		[self.userPhoto loadFromURL:displayedPost.user.avatar.imageURL
+				   placeholderImage:[UIImage imageNamed:@"noprofilepic"]
+						  fromCache:[AppDelegate sharedAppDelegate].avatarImageCache];
+```
+
+In this example we are setting the image on a UIImageView called userPhoto the placeholder will be displayed while the image is downloaded & decoded, here we specifically use the avatarImageCache we created earlier, if you pass nil here the UIImageView will use the TMDiskCache singleton.
+
+*CAVEAT*
+Because of the Category there is a requrirement that if you wish to load a normal image into the imageview, you need to call
+
+```
+		[self.userPhoto loadFromURL:nil
+				   placeholderImage:[UIImage imageNamed:@"myimage"]
+						  fromCache:nil];
+```
+
+Because the Category caches the last set URL if you by-pass this by calling setImage ( or view.image=whatever; ) then it will nopt pick this up.
