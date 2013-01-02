@@ -92,7 +92,7 @@
     _tempFileURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]]];
     
     
-    [[TMNetworkActivityIndicatorManager sharedManager] incrementActivityCount];
+    //[[TMNetworkActivityIndicatorManager sharedManager] incrementActivityCount];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:_remoteURL
                                                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
@@ -127,7 +127,7 @@
         [self notifyRequesters];
     }
     
-    [[TMNetworkActivityIndicatorManager sharedManager] decrementActivityCount];
+    //[[TMNetworkActivityIndicatorManager sharedManager] decrementActivityCount];
 }
 
 -(void)cancel
