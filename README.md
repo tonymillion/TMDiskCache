@@ -7,6 +7,33 @@ The main active parts of this are TMDiskCache and TMDownloadManager.
 
 The part you'll want to use is the UIImage category which allows you to set the image to load from a URL.
 
+# Using the UIImage category
+
+
+Very basically you call it like this
+
+```
+		[self.userPhoto loadFromURL:displayedPost.user.avatar.imageURL
+				   placeholderImage:[UIImage imageNamed:@"noprofilepic"]
+						  fromCache:[AppDelegate sharedAppDelegate].avatarImageCache];
+```
+
+*note: the url is passed as a ```NSString``` not a ```NSURL```*
+
+In this example we are setting the image on a UIImageView called userPhoto the placeholder will be displayed while the image is downloaded & decoded, here we specifically use the avatarImageCache we created earlier, if you pass nil here the UIImageView will use the TMDiskCache singleton.
+
+*CAVEAT*
+Because of the Category there is a requrirement that if you wish to load a normal image into the imageview, you need to call
+
+```
+		[self.userPhoto loadFromURL:nil
+				   placeholderImage:[UIImage imageNamed:@"myimage"]
+						  fromCache:nil];
+```
+
+Because the Category caches the last set URL if you by-pass this by calling setImage ( or view.image=whatever; ) then it will not pick this up.
+
+
 #basic usage of TMDiskCache
 
 At its simplest the UIImage category will use the "default" TMDiskCache singleton, however a better implementation is for you to alloc you own instances of TMDiskCache with their own cache sizes, e.g. if you were writing an app.net client you could do something like 
@@ -54,27 +81,3 @@ There are other methods in this class (one to set a data blob for a URL and one 
 # Basic usage of TMDownloadManager
 
 **to be written**
-
-
-# Using the UIImage category
-
-Very basically you call it like this
-
-```
-		[self.userPhoto loadFromURL:displayedPost.user.avatar.imageURL
-				   placeholderImage:[UIImage imageNamed:@"noprofilepic"]
-						  fromCache:[AppDelegate sharedAppDelegate].avatarImageCache];
-```
-
-In this example we are setting the image on a UIImageView called userPhoto the placeholder will be displayed while the image is downloaded & decoded, here we specifically use the avatarImageCache we created earlier, if you pass nil here the UIImageView will use the TMDiskCache singleton.
-
-*CAVEAT*
-Because of the Category there is a requrirement that if you wish to load a normal image into the imageview, you need to call
-
-```
-		[self.userPhoto loadFromURL:nil
-				   placeholderImage:[UIImage imageNamed:@"myimage"]
-						  fromCache:nil];
-```
-
-Because the Category caches the last set URL if you by-pass this by calling setImage ( or view.image=whatever; ) then it will nopt pick this up.
