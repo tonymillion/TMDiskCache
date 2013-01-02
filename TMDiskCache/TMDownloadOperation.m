@@ -47,12 +47,8 @@
         requestersCopy = [_requesters copy];
     }
     
-    NSLog(@"NOTIFYING REQUESTERS(%d): %@", _requesters.count, _localFileURL);
-    
     [requestersCopy enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         NSDictionary * mapDict = obj;
-        
-        DLog(@"Requester: %@", mapDict[@"sender"]);
         
         void (^sucess_handler)(NSURL * localURL);
         void (^failure_handler)(NSError * error);
@@ -76,8 +72,6 @@
             }
         }
     }];
-    
-    NSLog(@"NOTIFYING DONE: %@", _localFileURL);
 }
 
 -(void)main
@@ -119,8 +113,6 @@
     [self.connection start];
     
     
-    NSLog(@"DOWNLOAD STARTS: %@", _localFileURL);
-    
     while(self.loading)
     {
         @autoreleasepool
@@ -132,7 +124,6 @@
     if(!self.error && ![self isCancelled])
     {
         //TODO: Call completion handler here
-        NSLog(@"DOWNLOAD ENDS: %@", _localFileURL);
         [self notifyRequesters];
     }
     
@@ -159,16 +150,12 @@
     
     @synchronized(_requesters)
     {
-        DLog(@"Adding Requester: %@", object);
-        
         __block BOOL found = NO;
         
         [_requesters enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             NSDictionary * mapDict = obj;
             if(mapDict[@"sender"] == object)
             {
-                DLog(@"REQUESTER ALREADY FOUND!");
-                
                 found = YES;
                 *stop = YES;
             }
@@ -236,7 +223,6 @@
     
     if(err)
     {
-        DLog(@"Error opening output file: %@", err);
         [connection cancel];
         
         self.error = err;
@@ -279,7 +265,6 @@
         
         if(left)
         {
-            NSLog(@"stream error: %@", [_outputStream streamError]);
         }
     }
 }
@@ -288,7 +273,6 @@
 {
     [_outputStream close];
     _outputStream = nil;
-    DLog(@"didFailWithError: %@", aError);
     
     //if the download failed delete whatever we had downloaded!
     [[NSFileManager defaultManager] removeItemAtURL:_localFileURL
@@ -306,7 +290,6 @@
     
     NSError * error = nil;
     
-    DLog(@"MOVING FILE INTO PLACE!");
     if(![[NSFileManager defaultManager] moveItemAtURL:_tempFileURL
                                                 toURL:_localFileURL
                                                 error:&error])
@@ -328,7 +311,6 @@
         
         if([filelength unsignedIntegerValue] != _response.expectedContentLength)
         {
-            DLog(@"filesize (%d) != contentlength(%lld)", filelength.unsignedIntegerValue, _response.expectedContentLength);
             //if the download failed delete whatever we had downloaded!
             [[NSFileManager defaultManager] removeItemAtURL:_localFileURL
                                                       error:nil];
@@ -337,7 +319,6 @@
         }
         else
         {
-            DLog(@"Filesize for %@ is correct", _localFileURL.path);
         }
     }
     else

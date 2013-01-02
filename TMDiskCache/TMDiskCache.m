@@ -147,7 +147,6 @@
                      options:(NSDataWritingAtomic)
                        error:&writeError])
         {
-            NSLog(@"Error caching data :(");
         }
         
         if(completion)
@@ -267,7 +266,6 @@
                                                                   includingPropertiesForKeys:keys
                                                                                      options:NSDirectoryEnumerationSkipsSubdirectoryDescendants | NSDirectoryEnumerationSkipsPackageDescendants
                                                                                 errorHandler:^BOOL(NSURL *url, NSError *error) {
-                                                                                    NSLog(@"Error: %@", error);
                                                                                     return YES;
                                                                                 }];
         
@@ -315,7 +313,6 @@
                 if(![[NSFileManager defaultManager] removeItemAtURL:topItem
                                                               error:&error])
                 {
-                    NSLog(@"Error deleting file: %@, %@", topItem, error);
                 }
                 
                 NSNumber * size;
@@ -329,7 +326,6 @@
         }
         else
         {
-            NSLog(@"No files!");
         }
         
 		if(trimCacheTask != UIBackgroundTaskInvalid)
@@ -353,7 +349,6 @@
 		}
 	}];
     
-	NSLog(@"Emptying Cache: %d", emptyCacheTask);
 	// all of this is done on a serial dispatch queue, so it'll never interact with itself!
     dispatch_async(self.trimQueue, ^{
         
@@ -364,7 +359,6 @@
                                                                   includingPropertiesForKeys:keys
                                                                                      options:NSDirectoryEnumerationSkipsSubdirectoryDescendants | NSDirectoryEnumerationSkipsPackageDescendants
                                                                                 errorHandler:^BOOL(NSURL *url, NSError *error) {
-                                                                                    NSLog(@"Error: %@", error);
                                                                                     return YES;
                                                                                 }];
         
@@ -374,13 +368,11 @@
 			if(![[NSFileManager defaultManager] removeItemAtURL:topItem
 														  error:&error])
 			{
-				NSLog(@"Error deleting file: %@, %@", topItem, error);
 			}
         }
         
 		if(emptyCacheTask != UIBackgroundTaskInvalid)
 		{
-			NSLog(@"Finishing EMPTY Task: %d", emptyCacheTask);
 			[[UIApplication sharedApplication] endBackgroundTask:emptyCacheTask];
 			emptyCacheTask = UIBackgroundTaskInvalid;
 		}

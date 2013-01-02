@@ -69,9 +69,6 @@
         
         if([dlop.remoteURL isEqual:url] && [dlop.localFileURL isEqual:localFileURL])
         {
-            
-            NSLog(@"Found EXISTING OPERATION - ADDING OURSELVES");
-
             [dlop addRequester:sender
                        success:success
                        failure:failure];
