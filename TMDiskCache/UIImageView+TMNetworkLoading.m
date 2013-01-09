@@ -84,7 +84,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     dispatch_once(&onceToken, ^{
         downloadQueue = [[NSOperationQueue alloc] init];
         downloadQueue.name = @"com.tonymillion.UIImageViewDecodeQueue";
-		downloadQueue.maxConcurrentOperationCount = 2;
+		downloadQueue.maxConcurrentOperationCount = 1;
     });
 
     return downloadQueue;
@@ -140,9 +140,6 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     {
         return;
     }
-
-    [self.decodeOperationQueue cancelAllOperations];
-
     
     ///////////////////////////////////////////////////
     //
@@ -167,6 +164,10 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     }
     
     // if we dont have it cached then we should set the placeholder here!
+    
+    //For some reason this messes up in other places so we're commenting it out for the moment
+    //[self.decodeOperationQueue cancelAllOperations];
+
     self.image = placeholderImage;
 
     if(!diskCache)
@@ -197,9 +198,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                                                                           {
                                                                               self.imageURL = url;
                                                                               [self setImageFromImage:temp forURL:url];
-
                                                                           }
-
                                                                       }
                                                                       failure:^(NSError *error) {
                                                                           self.imageURL = url;
