@@ -34,7 +34,7 @@
 
 @property(strong) NSOperationQueue  *downloadQueue;
 @property(strong) NSMutableArray    *askerDownloaderMappingArray;
-@property(assign) dispatch_queue_t  addNewDownloadSerialQueue;
+@property(strong) dispatch_queue_t  addNewDownloadSerialQueue;
 
 @end
 

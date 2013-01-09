@@ -114,12 +114,12 @@
 
 
     //[[TMNetworkActivityIndicatorManager sharedManager] incrementActivityCount];
-
+    
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:_remoteURL
                                                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                                        timeoutInterval:30];
 
-    [request setValue:@"gzip"
+    [request setValue:@"gzip, identity"
    forHTTPHeaderField:@"Accept-Encoding"];
 
     self.loading    = YES;
@@ -301,6 +301,8 @@
 
 	self.error = aError;
 	self.loading = NO;
+
+    DLog(@"Download of %@ failed with %@", _remoteURL, aError);
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection

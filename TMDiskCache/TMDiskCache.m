@@ -36,7 +36,7 @@
 @property(strong) NSURL             *diskCacheURL;
 @property(strong) NSOperationQueue  *downloadOperationQueue;
 
-@property(assign) dispatch_queue_t  trimQueue;
+@property(strong) dispatch_queue_t  trimQueue;
 
 @end
 
