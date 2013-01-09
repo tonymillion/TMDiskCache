@@ -138,7 +138,6 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     
     if([url isEqual:currentURL])
     {
-        DLog(@"URLS Match, image is alredy set!");
         return;
     }
 
@@ -223,7 +222,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
         }
         else
         {
-            DLog(@"image setoperation was cancelled before image was set");
+            //DLog(@"image setoperation was cancelled before image was set");
         }
         
         [[UIImageView downloadCache] setObject:theImage
