@@ -203,10 +203,6 @@ static char * const kOperationKey	= "kOperationKey";
                             {
                                 self.imageURL = url;
                                 [self setImageFromImage:temp forURL:url];
-
-                                [[UIImageView downloadCache] setObject:temp
-                                                                forKey:url.absoluteString
-                                                                  cost:50];
                             }
                         }
                         failure:^(NSURL *localURL, NSError *error) {
