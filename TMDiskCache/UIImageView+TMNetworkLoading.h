@@ -33,6 +33,7 @@
 @interface UIImageView (TMNetworkLoading)
 
 @property(strong, nonatomic) NSURL			*imageURL;
+@property(weak, nonatomic) NSOperation      *currentOp;
 
 -(void)loadFromURL:(NSURL *)url
   placeholderImage:(UIImage *)placeholderImage

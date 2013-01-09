@@ -32,12 +32,13 @@
 #import "UIImage+ForceLoad.h"
 
 static char * const kImageURLKey	= "kURLAssociationKey";
+static char * const kOperationKey	= "kOperationKey";
 
 
 @implementation UIImageView (TMNetworkLoading)
 
 @dynamic imageURL;
-
+@dynamic currentOp;
 // FOR FUTURE IMPLEMENTATION TO FIX setImage
 
 + (void)load
@@ -76,7 +77,23 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 }
 
 
--(NSOperationQueue*)decodeOperationQueue
+
+-(void)setCurrentOp:(NSOperation *)currentOp
+{
+    objc_setAssociatedObject(self,
+                             kOperationKey,
+                             currentOp,
+                             OBJC_ASSOCIATION_ASSIGN);
+}
+
+-(NSOperation*)currentOp
+{
+    return objc_getAssociatedObject(self, kOperationKey);
+}
+
+
+
++(NSOperationQueue*)decodeOperationQueue
 {
     static NSOperationQueue * downloadQueue;
 
@@ -84,7 +101,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     dispatch_once(&onceToken, ^{
         downloadQueue = [[NSOperationQueue alloc] init];
         downloadQueue.name = @"com.tonymillion.UIImageViewDecodeQueue";
-		downloadQueue.maxConcurrentOperationCount = 1;
+		downloadQueue.maxConcurrentOperationCount = 8;
     });
 
     return downloadQueue;
@@ -166,8 +183,12 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     // if we dont have it cached then we should set the placeholder here!
     
     //For some reason this messes up in other places so we're commenting it out for the moment
-    //[self.decodeOperationQueue cancelAllOperations];
-
+    if(self.currentOp)
+    {
+        [self.currentOp cancel];
+        self.currentOp = nil;
+    }
+    
     self.image = placeholderImage;
 
     if(!diskCache)
@@ -229,7 +250,8 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                                           cost:50];
     }];
     
-    [self.decodeOperationQueue addOperation:blockOp];
+    self.currentOp = blockOp;
+    [[UIImageView decodeOperationQueue] addOperation:blockOp];
 
     return theImage;
 }
