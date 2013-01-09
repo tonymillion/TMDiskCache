@@ -39,7 +39,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 @dynamic imageURL;
 
 // FOR FUTURE IMPLEMENTATION TO FIX setImage
-/*
+
 + (void)load
 {
     SEL originalSelector = @selector(setImage:);
@@ -61,7 +61,6 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     [self newSetImage:image];
     self.imageURL       = nil;
 }
-*/
 
 -(void)setImageURL:(NSURL *)imageURL
 {
@@ -108,11 +107,15 @@ static char * const kImageURLKey	= "kURLAssociationKey";
 
 -(void)setImageAnimated:(UIImage *)image
 {
+    NSURL* oldurl = self.imageURL;
+    
     CATransition *animation = [CATransition animation];
     animation.duration = 0.188;
     animation.type = kCATransitionFade;
     [[self layer] addAnimation:animation forKey:@"imageFade"];
-    [self setImage:image];
+    [self newSetImage:image];
+    
+    self.imageURL = oldurl;
 }
 
 
@@ -127,7 +130,15 @@ static char * const kImageURLKey	= "kURLAssociationKey";
     if(!url || [url isKindOfClass:[NSNull class]])
     {
         self.imageURL       = nil;
-        [self setImage:placeholderImage];
+        [self newSetImage:placeholderImage];
+        return;
+    }
+    
+    NSURL * currentURL = self.imageURL;
+    
+    if([url isEqual:currentURL])
+    {
+        DLog(@"URLS Match, image is alredy set!");
         return;
     }
 
@@ -144,7 +155,9 @@ static char * const kImageURLKey	= "kURLAssociationKey";
             // make sure we dont get called
             self.imageURL       = url;
             // Dont animate here, we can set the image immediately and haven't even loaded the placeholder
-            [self setImage:cachedImage];
+            [self newSetImage:cachedImage];
+            
+            self.imageURL       = url;
 
             //TODO: touch the file in the cache?
             return;
