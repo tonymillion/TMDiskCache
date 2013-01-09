@@ -142,6 +142,9 @@ static char * const kImageURLKey	= "kURLAssociationKey";
         return;
     }
 
+    [self.decodeOperationQueue cancelAllOperations];
+
+    
     ///////////////////////////////////////////////////
     //
     // next see if we have this in the cache
@@ -163,7 +166,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
             return;
         }
     }
-
+    
     // if we dont have it cached then we should set the placeholder here!
     self.image = placeholderImage;
 
@@ -178,7 +181,7 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                             if(temp)
                             {
                                 self.imageURL = url;
-                                [self setImageFromImage:temp];
+                                [self setImageFromImage:temp forURL:url];
 
                                 [[UIImageView downloadCache] setObject:temp
                                                                 forKey:url.absoluteString
@@ -194,11 +197,8 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                                                                           if(temp)
                                                                           {
                                                                               self.imageURL = url;
-                                                                              [self setImageFromImage:temp];
+                                                                              [self setImageFromImage:temp forURL:url];
 
-                                                                              [[UIImageView downloadCache] setObject:temp
-                                                                                                              forKey:url.absoluteString
-                                                                                                                cost:50];
                                                                           }
 
                                                                       }
@@ -208,13 +208,30 @@ static char * const kImageURLKey	= "kURLAssociationKey";
                         }];
 }
 
--(UIImage*)setImageFromImage:(UIImage*)theImage
+-(UIImage*)setImageFromImage:(UIImage*)theImage forURL:(NSURL*)url
 {
-    [theImage forceLoad];
-
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        [self setImageAnimated:theImage];
-    });
+    __block NSOperation * blockOp;
+    blockOp = [NSBlockOperation blockOperationWithBlock:^{
+        [theImage forceLoad];
+        
+        if(!blockOp.isCancelled)
+        {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                // test fromCurrentURL == self.imageURL and if not, drop out
+                [self setImageAnimated:theImage];
+            });
+        }
+        else
+        {
+            DLog(@"image setoperation was cancelled before image was set");
+        }
+        
+        [[UIImageView downloadCache] setObject:theImage
+                                        forKey:url.absoluteString
+                                          cost:50];
+    }];
+    
+    [self.decodeOperationQueue addOperation:blockOp];
 
     return theImage;
 }
