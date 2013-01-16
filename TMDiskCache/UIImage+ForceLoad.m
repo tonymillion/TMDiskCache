@@ -55,9 +55,11 @@
 												 CGImageGetBytesPerRow(cgImage),
 												 colorspace,
 												 kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+    CGColorSpaceRelease(colorspace);
 
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
     CGContextRelease(context);
+    
 }
 
 @end
