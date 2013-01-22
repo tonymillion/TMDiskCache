@@ -23,16 +23,12 @@ Very basically you call it like this
 In this example we are setting the image on a UIImageView called userPhoto the placeholder will be displayed while the image is downloaded & decoded, here we specifically use the avatarImageCache we created earlier, if you pass nil here the UIImageView will use the TMDiskCache singleton.
 
 *CAVEAT*
-Because of the Category there is a requrirement that if you wish to load a normal image into the imageview, you need to call
 
-```
-		[self.userPhoto loadFromURL:nil
-				   placeholderImage:[UIImage imageNamed:@"myimage"]
-						  fromCache:nil];
-```
+The UIImageView category now uses method swizzling to take care of this.
 
-Because the Category caches the last set URL if you by-pass this by calling setImage ( or view.image=whatever; ) then it will not pick this up.
+~~Because of the Category there is a requrirement that if you wish to load a normal image into the imageview, you need to call~~
 
+#####If Loading network images is all you care about, and you dont care about per type caches, read no further, and simply pass nil into the fromCache parameter!
 
 #basic usage of TMDiskCache
 
