@@ -30,6 +30,9 @@
 
 @interface UIImage (ForceLoad)
 
+- (UIImage*) initImmediateLoadWithContentsOfFile:(NSString*)path;
++ (UIImage*)imageImmediateLoadWithContentsOfFile:(NSString*)path;
+
 -(void)forceLoad;
 
 @end

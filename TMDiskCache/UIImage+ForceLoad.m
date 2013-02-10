@@ -30,6 +30,20 @@
 
 @implementation UIImage (ForceLoad)
 
++ (UIImage*)imageImmediateLoadWithContentsOfFile:(NSString*)path
+{
+    return [[UIImage alloc] initImmediateLoadWithContentsOfFile: path];
+}
+
+- (UIImage*) initImmediateLoadWithContentsOfFile:(NSString*)path
+{
+    UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
+    
+    [image forceLoad];
+    
+    return image;
+}
+
 // interesting trick, we force the UIImage to draw somewhere, then discard!
 // this has the action of demanding that the UIImage actually decode the data.
 
@@ -42,10 +56,12 @@
 	const int width = CGImageGetWidth(cgImage)/4;
     const int height = CGImageGetHeight(cgImage)/4;
 
+#if DEBUG
     if([[NSThread currentThread] isEqual:[NSThread mainThread]])
     {
-        NSLog(@"DANGER THIS IS EXECUTING ON THE MAIN THREAD");
+        NSLog(@"DANGER FORCELOAD IS EXECUTING ON THE MAIN THREAD");
     }
+#endif
 
 	const CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
