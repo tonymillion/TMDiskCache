@@ -301,8 +301,6 @@
 
 	self.error = aError;
 	self.loading = NO;
-
-    DLog(@"Download of %@ failed with %@", _remoteURL, aError);
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection

@@ -7,6 +7,8 @@ The main active parts of this are TMDiskCache and TMDownloadManager.
 
 The part you'll want to use is the UIImageView category which allows you to set the image to load from a URL.
 
+**Because of the loading animation you will need to link your project with QuarzCore.framework**
+
 # Using the UIImageView category
 
 
@@ -17,8 +19,6 @@ Very basically you call it like this
 				   placeholderImage:[UIImage imageNamed:@"noprofilepic"]
 						  fromCache:[AppDelegate sharedAppDelegate].avatarImageCache];
 ```
-
-*note: the url is passed as a ```NSString``` not a ```NSURL```*
 
 In this example we are setting the image on a UIImageView called userPhoto the placeholder will be displayed while the image is downloaded & decoded, here we specifically use the avatarImageCache we created earlier, if you pass nil here the UIImageView will use the TMDiskCache singleton.
 

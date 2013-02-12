@@ -27,6 +27,7 @@
 
 
 #import <objc/runtime.h>
+#import <QuartzCore/QuartzCore.h>
 
 #import "UIImageView+TMNetworkLoading.h"
 #import "UIImage+ForceLoad.h"
@@ -238,7 +239,7 @@ static char * const kOperationKey	= "kOperationKey";
         }
         else
         {
-            //DLog(@"image setoperation was cancelled before image was set");
+            //NSLog(@"image setoperation was cancelled before image was set");
         }
         
         [[UIImageView downloadCache] setObject:theImage
