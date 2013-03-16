@@ -39,4 +39,10 @@
   placeholderImage:(UIImage *)placeholderImage
 		 fromCache:(TMDiskCache*)cache;
 
+
+-(void)loadFromURL:(NSURL *)url
+  placeholderImage:(UIImage *)placeholderImage
+		 fromCache:(TMDiskCache*)diskCache
+    imageProcessor:(UIImage * (^)(UIImage * image))processor;
+
 @end

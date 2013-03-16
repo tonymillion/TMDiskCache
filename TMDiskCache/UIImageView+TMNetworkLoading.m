@@ -59,7 +59,7 @@ static char * const kOperationKey	= "kOperationKey";
 }
 
 -(void)newSetImage:(UIImage*)image
-{
+{    
     [self newSetImage:image];
     self.imageURL       = nil;
 }
@@ -136,10 +136,21 @@ static char * const kOperationKey	= "kOperationKey";
     self.imageURL = oldurl;
 }
 
+-(void)loadFromURL:(NSURL *)url
+  placeholderImage:(UIImage *)placeholderImage
+		 fromCache:(TMDiskCache*)diskCache
+{
+    [self loadFromURL:url
+     placeholderImage:placeholderImage
+            fromCache:diskCache
+       imageProcessor:nil];
+}
+
 
 -(void)loadFromURL:(NSURL *)url
   placeholderImage:(UIImage *)placeholderImage
 		 fromCache:(TMDiskCache*)diskCache
+    imageProcessor:(UIImage * (^)(UIImage * image))processor
 {
     [[TMDownloadManager sharedInstance] cancelCallbacksForSender:self];
 
@@ -203,7 +214,7 @@ static char * const kOperationKey	= "kOperationKey";
                             if(temp)
                             {
                                 self.imageURL = url;
-                                [self setImageFromImage:temp forURL:url];
+                                [self setImageFromImage:temp forURL:url imageProcessor:processor];
                             }
                         }
                         failure:^(NSURL *localURL, NSError *error) {
@@ -215,7 +226,8 @@ static char * const kOperationKey	= "kOperationKey";
                                                                           if(temp)
                                                                           {
                                                                               self.imageURL = url;
-                                                                              [self setImageFromImage:temp forURL:url];
+                                                                              [self setImageFromImage:temp
+                                                                                               forURL:url imageProcessor:processor];
                                                                           }
                                                                       }
                                                                       failure:^(NSError *error) {
@@ -224,17 +236,28 @@ static char * const kOperationKey	= "kOperationKey";
                         }];
 }
 
--(UIImage*)setImageFromImage:(UIImage*)theImage forURL:(NSURL*)url
+-(void)setImageFromImage:(UIImage*)theImage
+                      forURL:(NSURL*)url
+              imageProcessor:(UIImage * (^)(UIImage * image))processor
 {
+    
     __block NSOperation * blockOp;
     blockOp = [NSBlockOperation blockOperationWithBlock:^{
         [theImage forceLoad];
+        
+        // I guess processor should be here?
+        __block UIImage * processedImage = theImage;
+        if(processor)
+        {
+            processedImage = processor(theImage);
+        }
+
         
         if(!blockOp.isCancelled)
         {
             dispatch_sync(dispatch_get_main_queue(), ^{
                 // test fromCurrentURL == self.imageURL and if not, drop out
-                [self setImageAnimated:theImage];
+                [self setImageAnimated:processedImage];
             });
         }
         else
@@ -242,15 +265,13 @@ static char * const kOperationKey	= "kOperationKey";
             //NSLog(@"image setoperation was cancelled before image was set");
         }
         
-        [[UIImageView downloadCache] setObject:theImage
+        [[UIImageView downloadCache] setObject:processedImage
                                         forKey:url.absoluteString
                                           cost:50];
     }];
     
     self.currentOp = blockOp;
     [[UIImageView decodeOperationQueue] addOperation:blockOp];
-
-    return theImage;
 }
 
 @end
