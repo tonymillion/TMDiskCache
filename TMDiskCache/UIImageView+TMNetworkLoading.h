@@ -35,6 +35,8 @@
 @property(strong, nonatomic) NSURL			*imageURL;
 @property(weak, nonatomic) NSOperation      *currentOp;
 
+-(void)setImageAnimated:(UIImage *)image;
+
 -(void)loadFromURL:(NSURL *)url
   placeholderImage:(UIImage *)placeholderImage
 		 fromCache:(TMDiskCache*)cache;
