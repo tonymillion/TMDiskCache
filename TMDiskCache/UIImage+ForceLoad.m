@@ -27,22 +27,25 @@
 
 
 #import "UIImage+ForceLoad.h"
+#import <ImageIO/ImageIO.h>
 
 @implementation UIImage (ForceLoad)
 
-+ (UIImage*)imageImmediateLoadWithContentsOfFile:(NSString*)path
++(UIImage*)immediateImageWithData:(NSData*)data
 {
-    return [[UIImage alloc] initImmediateLoadWithContentsOfFile: path];
+    NSDictionary *dict = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
+                                                     forKey:(id)kCGImageSourceShouldCache];
+    
+    CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
+    CGImageRef cgImage = CGImageSourceCreateImageAtIndex(source, 0, (__bridge CFDictionaryRef)dict);
+    
+    UIImage *temp = [UIImage imageWithCGImage:cgImage];
+    CGImageRelease(cgImage);
+    CFRelease(source);
+    
+    return temp;
 }
 
-- (UIImage*) initImmediateLoadWithContentsOfFile:(NSString*)path
-{
-    UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
-    
-    [image forceLoad];
-    
-    return image;
-}
 
 // interesting trick, we force the UIImage to draw somewhere, then discard!
 // this has the action of demanding that the UIImage actually decode the data.
@@ -53,8 +56,8 @@
 {
     const CGImageRef cgImage = [self CGImage];
 
-	const int width = CGImageGetWidth(cgImage)/4;
-    const int height = CGImageGetHeight(cgImage)/4;
+	//const int width = CGImageGetWidth(cgImage)/4;
+    //const int height = CGImageGetHeight(cgImage)/4;
 
 #if DEBUG
     if([[NSThread currentThread] isEqual:[NSThread mainThread]])
@@ -66,14 +69,14 @@
 	const CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
 	CGContextRef context = CGBitmapContextCreate(NULL,
-												 width, height,
+												 1, 1,
 												 CGImageGetBitsPerComponent(cgImage),
 												 CGImageGetBytesPerRow(cgImage),
 												 colorspace,
 												 kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
     CGColorSpaceRelease(colorspace);
 
-    CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
+    CGContextDrawImage(context, CGRectMake(0, 0, 1, 1), cgImage);
     CGContextRelease(context);
     
 }
