@@ -33,13 +33,11 @@
 
 +(UIImage*)immediateImageWithData:(NSData*)data
 {
-    NSDictionary *dict = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
-                                                     forKey:(id)kCGImageSourceShouldCache];
-    
     CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
-    CGImageRef cgImage = CGImageSourceCreateImageAtIndex(source, 0, (__bridge CFDictionaryRef)dict);
+    CGImageRef cgImage = CGImageSourceCreateImageAtIndex(source, 0, (__bridge CFDictionaryRef)@{(id)kCGImageSourceShouldCacheImmediately: (id)kCFBooleanTrue});
     
     UIImage *temp = [UIImage imageWithCGImage:cgImage];
+
     CGImageRelease(cgImage);
     CFRelease(source);
     
@@ -55,9 +53,6 @@
 -(void)forceLoad
 {
     const CGImageRef cgImage = [self CGImage];
-
-	//const int width = CGImageGetWidth(cgImage)/4;
-    //const int height = CGImageGetHeight(cgImage)/4;
 
 #if DEBUG
     if([[NSThread currentThread] isEqual:[NSThread mainThread]])
