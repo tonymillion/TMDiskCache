@@ -247,7 +247,7 @@
                 failure(readError);
         }
 
-        dispatch_async(_trimQueue, ^{
+        dispatch_async(self.trimQueue, ^{
             [self touchCachedURL:url];
         });
     }];
